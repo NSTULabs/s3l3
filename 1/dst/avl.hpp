@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <functional>
 
 using namespace std;
 
@@ -26,7 +27,7 @@ public:
         return head;
     }
 
-    int height(AVLTreeNode* node) {
+    int height(AVLTreeNode* node) const {
         return node == nullptr ? 0 : node->height;
     }
 
@@ -107,56 +108,23 @@ public:
         return node;
     }
 
-    AVLTreeNode* insert(AVLTreeNode* node, int value) {
-        if (node == nullptr) {
-            return new AVLTreeNode(value);
-        }
-
-        if (value < node->value) {
-            node->left = insert(node->left, value);
-        } else if (value > node->value) {
-            node->right = insert(node->right, value);
-        } else {
-            return node; // в дереве нет дубликатов
-        }
-
-        return balanceNode(node);
-    }
-
-    void insertNum(int value) {
-        head = insert(head, value);
-    }
-
-    AVLTreeNode* remove(AVLTreeNode* node, int value) {
-        if (node == nullptr) {
-            return node;
-        }
-
-        if (value < node->value) {
-            node->left = remove(node->left, value);
-        } else if (value > node->value) {
-            node->right = remove(node->right, value);
-        } else { // узел для удаления найден
-            if (node->left == nullptr || node->right == nullptr) { // если один ребёнок
-                AVLTreeNode* temp = node->left ? node->left : node->right;
-                if (temp == nullptr) { // если нет детей
-                    temp = node;
-                    node = nullptr;
-                } else {
-                    *node = *temp;
-                }
-                delete temp;
-            } else { // если два ребёнка
-                AVLTreeNode* temp = getMinValueNode(node->right); // находим минимальное справа, ставим на место удаляемого
-                node->value = temp->value;
-                node->right = remove(node->right, temp->value);
+    void insert(int value) {
+        function<AVLTreeNode*(AVLTreeNode*, int)> insertValue = [&](AVLTreeNode* node, int value) -> AVLTreeNode* {
+            if (node == nullptr) {
+                return new AVLTreeNode(value);
             }
-        }
-        if (node == nullptr) {
-            return node;
-        }
 
-        return balanceNode(node);
+            if (value < node->value) {
+                node->left = insertValue(node->left, value);
+            } else if (value > node->value) {
+                node->right = insertValue(node->right, value);
+            } else {
+                return node; // в дереве нет дубликатов
+            }
+
+            return balanceNode(node);
+        };
+        head = insertValue(head, value);
     }
 
     AVLTreeNode* getMinValueNode(AVLTreeNode* node) {
@@ -167,87 +135,55 @@ public:
         return current;
     }
 
-    void removeNum(int value) {
-        head = remove(head, value);
-    }
+    void remove(int value) {
+        function<AVLTreeNode*(AVLTreeNode*, int)> removeValue = [&](AVLTreeNode* node, int value) {
+            if (node == nullptr) {
+                return node;
+            }
 
-    AVLTreeNode* findRecursion(AVLTreeNode* node, int value) {
-        if (node == nullptr || node->value == value) {
-            return node;
-        }
+            if (value < node->value) {
+                node->left = removeValue(node->left, value);
+            } else if (value > node->value) {
+                node->right = removeValue(node->right, value);
+            } else { // узел для удаления найден
+                if (node->left == nullptr || node->right == nullptr) { // если один ребёнок
+                    AVLTreeNode* temp = node->left ? node->left : node->right;
+                    if (temp == nullptr) { // если нет детей
+                        temp = node;
+                        node = nullptr;
+                    } else {
+                        *node = *temp;
+                    }
+                    delete temp;
+                } else { // если два ребёнка
+                    AVLTreeNode* temp = getMinValueNode(node->right); // находим минимальное справа, ставим на место удаляемого
+                    node->value = temp->value;
+                    node->right = removeValue(node->right, temp->value);
+                }
+            }
+            if (node == nullptr) {
+                return node;
+            }
 
-        if (value < node->value) {
-            return findRecursion(node->left, value);
-        } else {
-            return findRecursion(node->right, value);
-        }
+            return balanceNode(node);
+        };
+        head = removeValue(head, value);
     }
 
     AVLTreeNode* find(int value) {
-        return findRecursion(head, value);
-    }
+        function<AVLTreeNode*(AVLTreeNode*, int)> findValue = [&](AVLTreeNode* node, int value) -> AVLTreeNode* {
+            if (node == nullptr || node->value == value) {
+                return node;
+            }
 
-    void serializeNode(AVLTreeNode* node, string& result) {
-        if (node == nullptr) {
-            result += "#-";  // пустой узел
-            return;
-        }
-        result += to_string(node->value) + "-";
-        serializeNode(node->left, result);
-        serializeNode(node->right, result);
-    }
-
-    // AVLTreeNode -> string
-    string serialize() {
-        string result;
-        serializeNode(head, result);
-        return result;
-    }
-
-    // string -> AVLTreeNode
-    void unserialize(const string& data) {
-        istringstream ss(data);
-        head = unserializeSS(ss);
-    }
-
-    AVLTreeNode* unserializeSS(istringstream& ss) {
-        string val;
-        getline(ss, val, '-');
-
-        if (val == "#") {
-            return nullptr;
-        }
-
-        AVLTreeNode* node = new AVLTreeNode(stoi(val));
-        node->left = unserializeSS(ss);
-        node->right = unserializeSS(ss);
-
-        return node;
+            if (value < node->value) {
+                return findValue(node->left, value);
+            } else {
+                return findValue(node->right, value);
+            }
+        };
+        return findValue(head, value);
     }
 };
-
-void printAVLTree(string& result, AVLTreeNode* node, int depth = 0, string prefix = "") {
-    if (node == nullptr) {
-        return;
-    }
-    if (node->right != nullptr) {
-        printAVLTree(result, node->right, depth + 1, prefix + "\t");
-    }
-    result += "\n";
-
-    result += prefix;
-    result += "[" + to_string(node->value) + "]\n";
-
-    if (node->left != nullptr) {
-        printAVLTree(result, node->left, depth + 1, prefix + "\t");
-    }
-}
-
-ostream& operator<<(ostream& os, const AVLTree& tree) {
-    string stringTree = "";
-    printAVLTree(stringTree, tree.getHead());
-    os << stringTree;
-    return os;
-}
 
 #endif

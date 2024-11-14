@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE DlistTest
+#define BOOST_TEST_MODULE DListTest
 #include "../dst/dlist.hpp"
 #include "../utils/utils.hpp"
 #include <boost/test/included/unit_test.hpp>
