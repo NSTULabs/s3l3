@@ -45,6 +45,7 @@ public:
         SNode<T>* node = new SNode<T>(value);
         if (head == nullptr) {
             head = node;
+            len++;
             return;
         }
 
@@ -58,7 +59,7 @@ public:
 
     T get(int index) const {
         if (index < 0 || index >= len) {
-            throw runtime_error("Index out of bounds");
+            throw runtime_error("Invalid index");
         }
 
         SNode<T>* current = head;
@@ -95,6 +96,10 @@ public:
     }
 
     void removeValue(const T& value) {
+        if (head == nullptr) {
+            throw runtime_error("List is empty");
+        }
+
         SNode<T>* prev = nullptr;
         SNode<T>* current = head;
 
@@ -103,10 +108,12 @@ public:
                 if (prev != nullptr) {
                     prev->next = current->next;
                     delete current;
+                    len--;
                     current = prev->next;
                 } else {
                     head = current->next;
                     delete current;
+                    len--;
                     current = head;
                 }
             } else {

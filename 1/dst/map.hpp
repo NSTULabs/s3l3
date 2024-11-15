@@ -58,7 +58,7 @@ public:
     }
 
     void put(string key, T value) {
-        if (static_cast<double>(len) / cap >= loadFactor) {
+        if ((float)len / cap >= loadFactor) {
             rehash(cap * 2);
         }
 
@@ -68,10 +68,6 @@ public:
             data[index] = new MapNode<T>(key, value);
         } else { // бакет есть -> добавляем в него
             MapNode<T>* current = data[index];
-            if (current->key == key) {
-                current->value = value;
-                return;
-            }
 
             while (current->next != nullptr) {
                 if (current->key == key) {
@@ -79,6 +75,10 @@ public:
                     return;
                 }
                 current = current->next;
+            }
+            if (current->key == key) { // check last element
+                current->value = value;
+                return;
             }
 
             current->next = new MapNode<T>(key, value);

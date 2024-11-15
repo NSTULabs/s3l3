@@ -24,19 +24,13 @@ public:
     }
 
     T pop() {
-        if (list.head == nullptr) {
+        if (list.getHead() == nullptr) {
             throw runtime_error("Stack is empty");
         }
-        T popped = list.head->value;
+        T popped = list.getHead()->value;
         list.removeForward();
         return popped;
     }
 };
-
-template <typename T>
-ostream& operator<<(ostream& os, const Stack<T>& stack) {
-    os << stack.data() << endl;
-    return os;
-}
 
 #endif
