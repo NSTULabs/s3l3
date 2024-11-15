@@ -2,6 +2,7 @@
 #include "../dst/avl.hpp"
 #include "../utils/utils.hpp"
 #include <boost/test/included/unit_test.hpp>
+#include <chrono>
 
 
 BOOST_AUTO_TEST_CASE(test_right_rotate) {
@@ -92,4 +93,19 @@ BOOST_AUTO_TEST_CASE(test_remove) {
     head = avl.getHead();
     BOOST_CHECK_EQUAL(head->value, 3);
     BOOST_CHECK_EQUAL(head->left->value, 0);
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_insert) {
+    AVLTree tree;
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < 1000; i++) {
+        tree.insert(i);
+    }
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+
+    cout << "Execution 1000 insert time: " << duration.count() << " microseconds" << endl;
+
+    BOOST_CHECK(true);
 }

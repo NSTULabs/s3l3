@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE QueueTest
 #include "../dst/queue.hpp"
 #include <boost/test/included/unit_test.hpp>
+#include <chrono>
 
 
 
@@ -23,4 +24,19 @@ BOOST_AUTO_TEST_CASE(test_enqueue_dequeue_size) {
     BOOST_CHECK_EQUAL(queue.size(), 0);
 
     BOOST_CHECK_THROW(queue.dequeue(), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_push) {
+    Queue<int> queue;
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < 100000; i++) {
+        queue.enqueue(i);
+    }
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+
+    cout << "Execution 100000 insert time: " << duration.count() << " microseconds" << endl;
+
+    BOOST_CHECK(true);
 }

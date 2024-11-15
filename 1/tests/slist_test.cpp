@@ -2,6 +2,7 @@
 #include "../dst/slist.hpp"
 #include "../utils/utils.hpp"
 #include <boost/test/included/unit_test.hpp>
+#include <chrono>
 
 
 BOOST_AUTO_TEST_CASE(test_pushBack_removeBack_get) {
@@ -107,4 +108,19 @@ BOOST_AUTO_TEST_CASE(test_findByValue) {
 
     // non-existing value test
     BOOST_CHECK_EQUAL(slist.findByValue(10001), nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_pushBack) {
+    SList<int> slist;
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < 100000; i++) {
+        slist.pushBack(i);
+    }
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+
+    cout << "Execution 100000 insert time: " << duration.count() << " microseconds" << endl;
+
+    BOOST_CHECK(true);
 }

@@ -1,8 +1,8 @@
 #define BOOST_TEST_MODULE DSTTest
 #include "../dst/array.hpp"
 #include "../utils/utils.hpp"
+#include <chrono>
 #include <boost/test/included/unit_test.hpp>
-
 
 BOOST_AUTO_TEST_CASE(test_add_get) {
     const int ARR_LEN = 20;
@@ -70,4 +70,19 @@ BOOST_AUTO_TEST_CASE(test_set) {
 
     BOOST_CHECK_EQUAL(arr.size(), ARR_LEN);
     BOOST_CHECK_EQUAL(arr[setIndex], testValue);
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_pushBack) {
+    Array<int> arr;
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < 100000; i++) {
+        arr.pushBack(i);
+    }
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+
+    cout << "Execution 100000 insert time: " << duration.count() << " microseconds" << endl;
+
+    BOOST_CHECK(true);
 }

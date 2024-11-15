@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE MapTest
 #include "../dst/map.hpp"
 #include <boost/test/included/unit_test.hpp>
+#include <chrono>
 
 
 BOOST_AUTO_TEST_CASE(test_put_get_remove) {
@@ -83,4 +84,19 @@ BOOST_AUTO_TEST_CASE(test_empty) {
     BOOST_CHECK_EQUAL(map.size(), 0);
     BOOST_CHECK_THROW(map.get("1"), runtime_error);
     BOOST_CHECK_THROW(map.remove("1"), runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_pushBack) {
+    Map<int> map;
+    auto start = chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < 100000; i++) {
+        map.put(to_string(i), i);
+    }
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+
+    cout << "Execution 100000 insert time: " << duration.count() << " microseconds" << endl;
+
+    BOOST_CHECK(true);
 }
