@@ -32,17 +32,11 @@ public:
             throw runtime_error("Queue is empty");
         }
 
-        T dequeued = list.head->value;
+        T dequeued = list.getHead()->value;
         list.removeForward();
 
         return dequeued;
     }
 };
-
-template <typename T>
-ostream& operator<<(ostream& os, const Queue<T>& queue) {
-    os << queue.data() << endl;
-    return os;
-}
 
 #endif

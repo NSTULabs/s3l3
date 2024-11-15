@@ -41,11 +41,11 @@ public:
         return data;
     }
 
-    int getLen() const {
+    int size() const {
         return len;
     }
 
-    int getCap() const {
+    int capacity() const {
         return cap;
     }
 
@@ -161,37 +161,6 @@ public:
         data = newMap;
         cap = newcap;
     }
-
-    string join() {
-        string result = "";
-
-        for (int i = 0; i < cap; i++) {
-            MapNode<T>* current = data[i];
-            while (current != nullptr) {
-                result += current->key + "," + current->value + ";";
-                current = current->next;
-            }
-        }
-        result = result.substr(0, result.size() - 1);
-        return result;
-    }
 };
-
-template <typename T>
-ostream& operator<<(ostream& os, const Map<T>& map) {
-    MapNode<T>** data = map.getData();
-    for (int i = 0; i < map.getCap(); i++) {
-        if (data[i] != nullptr) {
-            auto current = data[i];
-            os << i << ": ";
-            while (current!= nullptr) {
-                os << current->key << " - " << current->value << ", ";
-                current = current->next;
-            }
-            os << endl;
-        }
-    }
-    return os;
-}
 
 #endif
