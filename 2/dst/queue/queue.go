@@ -3,32 +3,38 @@ package queue
 import (
 	"dst/dst/dlist"
 	"errors"
-
-	"golang.org/x/exp/constraints"
 )
 
 var (
 	ErrEmptyQueue = errors.New("empty queue")
 )
 
-type Queue[T constraints.Ordered] struct {
-	list dlist.DList[T]
+type Queue struct {
+	list dlist.DList
 }
 
-func (q *Queue[T]) Len() int {
+func (q *Queue) Len() int {
 	return q.list.Len()
 }
 
-func (q *Queue[T]) Push(value T) {
+func (q *Queue) Push(value int) {
 	q.list.PushBack(value)
 }
 
-func (q *Queue[T]) Pop() (T, error) {
+func (q *Queue) Pop() (int, error) {
 	if q.list.Len() == 0 {
-		var zero T
+		var zero int
 		return zero, ErrEmptyQueue
 	}
 	value, _ := q.list.Get(0)
 	q.list.RemoveForward()
 	return value, nil
+}
+
+func (q *Queue) Serialize(filename string) error {
+	return q.list.Serialize(filename)
+}
+
+func (q *Queue) Deserialize(filename string) error {
+	return q.list.Deserialize(filename)
 }

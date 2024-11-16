@@ -8,7 +8,7 @@ import (
 )
 
 func TestDList_PushBack_Get_RemoveBack(t *testing.T) {
-	var list dlist.DList[int]
+	var list dlist.DList
 
 	for i := 0; i < 10; i++ {
 		list.PushBack(i)
@@ -30,7 +30,7 @@ func TestDList_PushBack_Get_RemoveBack(t *testing.T) {
 }
 
 func Test_PushForward_Get(t *testing.T) {
-	var list dlist.DList[int]
+	var list dlist.DList
 
 	for i := 0; i < 10; i++ {
 		list.PushForward(i)
@@ -51,7 +51,7 @@ func Test_PushForward_Get(t *testing.T) {
 }
 
 func Test_Empty(t *testing.T) {
-	var list dlist.DList[int]
+	var list dlist.DList
 
 	err := list.RemoveBack()
 	require.ErrorIs(t, dlist.ErrEmptyList, err)
@@ -65,7 +65,7 @@ func Test_Empty(t *testing.T) {
 }
 
 func Test_RemoveBack_RemoveForward_One(t *testing.T) {
-	var list dlist.DList[int]
+	var list dlist.DList
 
 	list.PushBack(1)
 	err := list.RemoveBack()
@@ -79,7 +79,7 @@ func Test_RemoveBack_RemoveForward_One(t *testing.T) {
 }
 
 func Test_RemoveValue(t *testing.T) {
-	var list dlist.DList[int]
+	var list dlist.DList
 
 	for i := 0; i < 10; i++ {
 		list.PushBack(1)
@@ -96,7 +96,7 @@ func Test_RemoveValue(t *testing.T) {
 }
 
 func Test_FindHeadTail(t *testing.T) {
-	var list dlist.DList[int]
+	var list dlist.DList
 
 	list.PushBack(10)
 	found := list.Find(10)

@@ -8,7 +8,7 @@ import (
 )
 
 func TestQueue(t *testing.T) {
-	var dst queue.Queue[int]
+	var dst queue.Queue
 	for i := 0; i < 10; i++ {
 		dst.Push(i)
 	}
@@ -22,11 +22,31 @@ func TestQueue(t *testing.T) {
 }
 
 func TestEmpty(t *testing.T) {
-	var dst queue.Queue[int]
+	var dst queue.Queue
 	value, err := dst.Pop()
 	require.Equal(t, 0, value)
 	require.ErrorIs(t, queue.ErrEmptyQueue, err)
 	require.Equal(t, 0, dst.Len())
+}
+
+func TestSerialize(t *testing.T) {
+	var dst queue.Queue
+	for i := 0; i < 10; i++ {
+		dst.Push(i)
+	}
+	require.Equal(t, 10, dst.Len())
+	err := dst.Serialize("queue.bin")
+	require.NoError(t, err)
+
+	var dst2 queue.Queue
+	err = dst2.Deserialize("queue.bin")
+	require.NoError(t, err)
+	for i := 0; i < 10; i++ {
+		val, err := dst2.Pop()
+		require.NoError(t, err)
+		require.Equal(t, i, val)
+	}
+	require.Equal(t, 0, dst2.Len())
 }
 
 func BenchmarkPush(b *testing.B) {
@@ -42,7 +62,7 @@ func BenchmarkPush(b *testing.B) {
 		for _, c := range cases {
 			b.Run(c.name, func(bb *testing.B) {
 				for i := 0; i < b.N; i++ {
-					dst := queue.Queue[int]{}
+					dst := queue.Queue{}
 					for j := 0; j < c.count; j++ {
 						dst.Push(j)
 					}

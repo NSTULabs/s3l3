@@ -1,9 +1,11 @@
 package dlist
 
 import (
+	"dst/dst"
+	"encoding/binary"
 	"errors"
-
-	"golang.org/x/exp/constraints"
+	"io"
+	"os"
 )
 
 var (
@@ -11,32 +13,32 @@ var (
 	ErrEmptyList    = errors.New("list is empty")
 )
 
-type Node[T constraints.Ordered] struct {
-	Value T
-	Next  *Node[T]
-	Prev  *Node[T]
+type Node struct {
+	Value int
+	Next  *Node
+	Prev  *Node
 }
 
-type DList[T constraints.Ordered] struct {
-	head *Node[T]
-	tail *Node[T]
+type DList struct {
+	head *Node
+	tail *Node
 	len  int
 }
 
-func (l *DList[T]) Len() int {
+func (l *DList) Len() int {
 	return l.len
 }
 
-func (l *DList[T]) Head() *Node[T] {
+func (l *DList) Head() *Node {
 	return l.head
 }
 
-func (l *DList[T]) Tail() *Node[T] {
+func (l *DList) Tail() *Node {
 	return l.tail
 }
 
-func (l *DList[T]) PushForward(value T) {
-	newNode := &Node[T]{
+func (l *DList) PushForward(value int) {
+	newNode := &Node{
 		Value: value,
 		Next:  l.head,
 		Prev:  nil,
@@ -50,11 +52,11 @@ func (l *DList[T]) PushForward(value T) {
 	l.len++
 }
 
-func (l *DList[T]) PushBack(value T) {
-	newNode := &Node[T]{
+func (l *DList) PushBack(value int) {
+	newNode := &Node{
 		Value: value,
 		Next:  nil,
-		Prev:  l.tail, // устанавливаем Prev для нового узла
+		Prev:  l.tail,
 	}
 	if l.len == 0 {
 		l.head = newNode
@@ -65,9 +67,9 @@ func (l *DList[T]) PushBack(value T) {
 	l.len++
 }
 
-func (l *DList[T]) Get(index int) (T, error) {
+func (l *DList) Get(index int) (int, error) {
 	if index < 0 || index >= l.len {
-		var zero T
+		var zero int
 		return zero, ErrInvalidIndex
 	}
 
@@ -80,7 +82,7 @@ func (l *DList[T]) Get(index int) (T, error) {
 	return current.Value, nil
 }
 
-func (l *DList[T]) RemoveForward() error {
+func (l *DList) RemoveForward() error {
 	if l.head == nil {
 		return ErrEmptyList
 	}
@@ -97,7 +99,7 @@ func (l *DList[T]) RemoveForward() error {
 	return nil
 }
 
-func (l *DList[T]) RemoveBack() error {
+func (l *DList) RemoveBack() error {
 	if l.head == nil {
 		return ErrEmptyList
 	}
@@ -116,7 +118,7 @@ func (l *DList[T]) RemoveBack() error {
 	return nil
 }
 
-func (l *DList[T]) RemoveValue(value T) error {
+func (l *DList) RemoveValue(value int) error {
 	if l.head == nil {
 		return ErrEmptyList
 	}
@@ -146,7 +148,7 @@ func (l *DList[T]) RemoveValue(value T) error {
 	return nil
 }
 
-func (l *DList[T]) Find(value T) *Node[T] {
+func (l *DList) Find(value int) *Node {
 	current := l.head
 	for current != nil {
 		if current.Value == value {
@@ -154,5 +156,54 @@ func (l *DList[T]) Find(value T) *Node[T] {
 		}
 		current = current.Next
 	}
+	return nil
+}
+
+func (l *DList) Serialize(filename string) error {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0744)
+	if err != nil {
+		return dst.ErrOpenFile
+	}
+	defer file.Close()
+
+	err = binary.Write(file, binary.LittleEndian, int32(l.len))
+	if err != nil {
+		return dst.ErrWrite
+	}
+
+	current := l.head
+	for current != nil {
+		binary.Write(file, binary.LittleEndian, int32(current.Value))
+		current = current.Next
+	}
+
+	return nil
+}
+
+func (l *DList) Deserialize(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return dst.ErrOpenFile
+	}
+	defer file.Close()
+
+	var desLen int32
+	err = binary.Read(file, binary.LittleEndian, &desLen)
+	if err != nil {
+		return dst.ErrRead
+	}
+
+	for {
+		var value int32
+		err = binary.Read(file, binary.LittleEndian, &value)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return dst.ErrRead
+		}
+		l.PushBack(int(value))
+	}
+
 	return nil
 }
