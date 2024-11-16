@@ -6,6 +6,8 @@ import (
 	"errors"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -159,7 +161,7 @@ func (l *DList) Find(value int) *Node {
 	return nil
 }
 
-func (l *DList) Serialize(filename string) error {
+func (l *DList) SerializeBinary(filename string) error {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0744)
 	if err != nil {
 		return dst.ErrOpenFile
@@ -180,7 +182,7 @@ func (l *DList) Serialize(filename string) error {
 	return nil
 }
 
-func (l *DList) Deserialize(filename string) error {
+func (l *DList) DeserializeBinary(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		return dst.ErrOpenFile
@@ -203,6 +205,59 @@ func (l *DList) Deserialize(filename string) error {
 			return dst.ErrRead
 		}
 		l.PushBack(int(value))
+	}
+
+	return nil
+}
+
+func (l *DList) Serialize(filename string) error {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0744)
+	if err != nil {
+		return dst.ErrOpenFile
+	}
+	defer file.Close()
+
+	current := l.head
+	if current == nil {
+		return nil
+	}
+
+	for current.Next != nil {
+		_, err := file.Write([]byte(strconv.Itoa(current.Value) + " "))
+		if err != nil {
+			return dst.ErrWrite
+		}
+		current = current.Next
+	}
+	_, err = file.Write([]byte(strconv.Itoa(current.Value)))
+	if err != nil {
+		return dst.ErrWrite
+	}
+
+	return nil
+}
+
+func (l *DList) Deserialize(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return dst.ErrOpenFile
+	}
+	defer file.Close()
+
+	fileData, err := io.ReadAll(file)
+	if err != nil {
+		return dst.ErrRead
+	}
+	if err == io.EOF {
+		return nil
+	}
+	numbers := strings.Split(string(fileData), " ")
+	for _, number := range numbers {
+		value, err := strconv.Atoi(number)
+		if err != nil {
+			return dst.ErrIntDeselialize
+		}
+		l.PushBack(value)
 	}
 
 	return nil

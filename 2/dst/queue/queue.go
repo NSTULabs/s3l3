@@ -31,6 +31,14 @@ func (q *Queue) Pop() (int, error) {
 	return value, nil
 }
 
+func (q *Queue) SerializeBinary(filename string) error {
+	return q.list.SerializeBinary(filename)
+}
+
+func (q *Queue) DeserializeBinary(filename string) error {
+	return q.list.DeserializeBinary(filename)
+}
+
 func (q *Queue) Serialize(filename string) error {
 	return q.list.Serialize(filename)
 }

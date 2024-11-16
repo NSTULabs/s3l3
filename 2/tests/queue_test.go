@@ -29,6 +29,26 @@ func TestEmpty(t *testing.T) {
 	require.Equal(t, 0, dst.Len())
 }
 
+func TestSerializeBinary(t *testing.T) {
+	var dst queue.Queue
+	for i := 0; i < 10; i++ {
+		dst.Push(i)
+	}
+	require.Equal(t, 10, dst.Len())
+	err := dst.SerializeBinary("queue.bin")
+	require.NoError(t, err)
+
+	var dst2 queue.Queue
+	err = dst2.DeserializeBinary("queue.bin")
+	require.NoError(t, err)
+	for i := 0; i < 10; i++ {
+		val, err := dst2.Pop()
+		require.NoError(t, err)
+		require.Equal(t, i, val)
+	}
+	require.Equal(t, 0, dst2.Len())
+}
+
 func TestSerialize(t *testing.T) {
 	var dst queue.Queue
 	for i := 0; i < 10; i++ {
