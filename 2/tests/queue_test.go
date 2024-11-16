@@ -2,6 +2,7 @@ package tests
 
 import (
 	"dst/dst/queue"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -50,16 +51,18 @@ func TestSerializeBinary(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
+	const filename = "queue.bin"
+
 	var dst queue.Queue
 	for i := 0; i < 10; i++ {
 		dst.Push(i)
 	}
 	require.Equal(t, 10, dst.Len())
-	err := dst.Serialize("queue.bin")
+	err := dst.Serialize(filename)
 	require.NoError(t, err)
 
 	var dst2 queue.Queue
-	err = dst2.Deserialize("queue.bin")
+	err = dst2.Deserialize(filename)
 	require.NoError(t, err)
 	for i := 0; i < 10; i++ {
 		val, err := dst2.Pop()
@@ -67,6 +70,8 @@ func TestSerialize(t *testing.T) {
 		require.Equal(t, i, val)
 	}
 	require.Equal(t, 0, dst2.Len())
+
+	os.Remove(filename)
 }
 
 func BenchmarkPush(b *testing.B) {
