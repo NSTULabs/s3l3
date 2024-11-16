@@ -148,6 +148,38 @@ public:
 
         return result;
     }
+
+    // works only with int
+    void serialize(const string& filename) {
+        ofstream ofs(filename, ios::binary);
+        if (!ofs.is_open()) {
+            throw runtime_error("Failed to open file");
+        }
+
+        ofs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+        SNode<T>* current = head;
+        while (current!= nullptr) {
+            ofs.write(reinterpret_cast<const char*>(&current->value), sizeof(current->value));
+            current = current->next;
+        }
+    }
+
+    // works only with int
+    void deserialize(const string& filename) {
+        ifstream ifs(filename, ios::binary);
+        if (!ifs.is_open()) {
+            throw runtime_error("Cannot open file for reading");
+        }
+
+        int size;
+        ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+
+        T value;
+        for (int i = 0; i < size; i++) {
+            ifs.read(reinterpret_cast<char*>(&value), sizeof(value));
+            pushBack(value);
+        }
+    }
 };
 
 template <typename T>

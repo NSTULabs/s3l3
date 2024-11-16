@@ -72,6 +72,29 @@ BOOST_AUTO_TEST_CASE(test_set) {
     BOOST_CHECK_EQUAL(arr[setIndex], testValue);
 }
 
+BOOST_AUTO_TEST_CASE(test_serialize_array) {
+    const int ARR_LEN = 100000;
+    Array<int> arr;
+
+    for (int i = 0; i < ARR_LEN; i++) {
+        arr.pushBack(i);
+    }
+
+    std::string filename = "array_test.bin";
+    arr.serialize(filename);
+
+    Array<int> arr2;
+    arr2.deserialize(filename);
+
+    remove(filename.c_str());
+
+    BOOST_CHECK_EQUAL(arr2.capacity(), arr.capacity());
+    BOOST_CHECK_EQUAL(arr2.size(), arr.size());
+    for (int i = 0; i < ARR_LEN; i++) {
+        BOOST_CHECK_EQUAL(arr2[i], arr[i]);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(benchmark_pushBack) {
     Array<int> arr;
     auto start = chrono::high_resolution_clock::now();

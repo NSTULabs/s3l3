@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <cstdint>
+#include <fstream>
 
 using namespace std;
 
@@ -161,6 +162,77 @@ public:
         data = newMap;
         cap = newcap;
     }
+
+    // works only with int value
+    void serialize(const string& filename) {
+        ofstream file(filename, ios::binary);
+        if (!file.is_open()) {
+            throw runtime_error("Error opening file");
+        }
+
+        file.write(reinterpret_cast<char*>(&len), sizeof(len));
+        for (int i = 0; i < cap; i++) {
+            MapNode<T>* current = data[i];
+            while (current!= nullptr) {
+                file << current->key << '\x00';
+                file.write(reinterpret_cast<char*>(&current->value), sizeof(current->value));
+                current = current->next;
+            }
+        }
+
+        file.close();
+    }
+
+    // works only with int value
+    void deserialize(const string& filename) {
+        ifstream file(filename, ios::binary);
+        if (!file.is_open()) {
+            throw runtime_error("Error opening file");
+        }
+
+        int serLen;
+        file.read(reinterpret_cast<char*>(&serLen), sizeof(serLen));
+        for (int i = 0; i < serLen; i++) {
+            string key;
+            char symbol = 0xFF;
+
+            while (true) {
+                file.read(&symbol, 1);
+                if (!file) {
+                    throw runtime_error("Error reading key data");
+                }
+                if (symbol == 0x00) {
+                    break;
+                }
+                key += symbol;
+            }
+
+            T value;
+            file.read(reinterpret_cast<char*>(&value), sizeof(value));
+
+            put(key, value);
+            cout << i << endl;
+        }
+
+        file.close();
+    }
 };
+
+template <typename T>
+ostream& operator<<(ostream& os, const Map<T>& map) {
+    MapNode<T>** data = map.getData();
+    for (int i = 0; i < map.capacity(); i++) {
+        if (data[i] != nullptr) {
+            auto current = data[i];
+            os << i << ": ";
+            while (current!= nullptr) {
+                os << current->key << " - " << current->value << ", ";
+                current = current->next;
+            }
+            os << endl;
+        }
+    }
+    return os;
+}
 
 #endif

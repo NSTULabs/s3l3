@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <sstream>
 #include <functional>
+#include <fstream>
 
 using namespace std;
 
@@ -184,6 +185,72 @@ public:
         };
         return findValue(head, value);
     }
+
+    // AVLTreeNode -> string
+    void serialize(const string& filename) {
+        ofstream ofs(filename, ios::binary);
+
+        function<void(AVLTreeNode*)> serializeNode = [&](AVLTreeNode* node) {
+            if (node == nullptr) {
+                int nullMarker = 0xFFFFFFFF;
+                ofs.write(reinterpret_cast<const char*>(&nullMarker), sizeof(nullMarker));
+                return;
+            }
+
+
+            ofs.write(reinterpret_cast<const char*>(&node->value), sizeof(node->value));
+
+            serializeNode(node->left);
+            serializeNode(node->right);
+        };
+
+        serializeNode(head);
+        ofs.close();
+    }
+
+    // string -> AVLTreeNode
+    void deserialize(const string& filename) {
+        ifstream ifs(filename, ios::binary);
+        function<AVLTreeNode*(ifstream&)> unserializeSS = [&](ifstream& ss) -> AVLTreeNode* {
+            int value;
+            ifs.read(reinterpret_cast<char*>(&value), sizeof(value));
+
+            if (value == 0xFFFFFFFF) {
+                return nullptr;
+            }
+
+            AVLTreeNode* node = new AVLTreeNode(value);
+            node->left = unserializeSS(ss);
+            node->right = unserializeSS(ss);
+
+            return node;
+        };
+        head = unserializeSS(ifs);
+    }
 };
+
+void printAVLTree(string& result, AVLTreeNode* node, int depth = 0, string prefix = "") {
+    if (node == nullptr) {
+        return;
+    }
+    if (node->right != nullptr) {
+        printAVLTree(result, node->right, depth + 1, prefix + "\t");
+    }
+    result += "\n";
+
+    result += prefix;
+    result += "[" + to_string(node->value) + "]\n";
+
+    if (node->left != nullptr) {
+        printAVLTree(result, node->left, depth + 1, prefix + "\t");
+    }
+}
+
+ostream& operator<<(ostream& os, const AVLTree& tree) {
+    string stringTree = "";
+    printAVLTree(stringTree, tree.getHead());
+    os << stringTree;
+    return os;
+}
 
 #endif

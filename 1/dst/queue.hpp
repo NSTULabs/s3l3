@@ -8,35 +8,30 @@ using namespace std;
 
 
 template <typename T>
-class Queue {
-private:
-    DList<T> list;
-
+class Queue: public DList<T> {
 public:
     Queue() {}
-    
-    DList<T> data() const {
-        return list;
-    }
-
-    int size() const {
-        return list.size();
-    }
 
     void enqueue(const T& val) {
-        list.pushBack(val);
+        this->pushBack(val);
     }
 
     T dequeue() {
-        if (size() == 0) {
+        if (this->len == 0) {
             throw runtime_error("Queue is empty");
         }
 
-        T dequeued = list.getHead()->value;
-        list.removeForward();
-
+        T dequeued = this->head->value;
+        this->removeForward();
         return dequeued;
     }
+private:
+    using DList<T>::pushBack;
+    using DList<T>::pushForward;
+    using DList<T>::removeBack;
+    using DList<T>::removeValue;
+    using DList<T>::findByValue;
+    using DList<T>::get;
 };
 
 #endif

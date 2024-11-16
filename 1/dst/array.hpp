@@ -2,6 +2,7 @@
 #define ARRAY_H
 
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -101,13 +102,46 @@ public:
         }
     }
 
+    // works only with int
+    void serialize(const string& filename) {
+        ofstream ofs(filename, ios::binary);
+        if (!ofs.is_open()) {
+            throw runtime_error("Failed to open file");
+        }
+
+        ofs.write(reinterpret_cast<const char*>(&len), sizeof(len));
+        ofs.write(reinterpret_cast<const char*>(&cap), sizeof(cap));
+
+        ofs.write(reinterpret_cast<const char*>(data), sizeof(T) * len);
+
+        ofs.close();
+    }
+
+    // works only with int
+    void deserialize(const string& filename) {
+        ifstream ifs(filename, ios::binary);
+        if (!ifs.is_open()) {
+            throw runtime_error("Cannot open file for reading");
+        }
+
+        ifs.read(reinterpret_cast<char*>(&len), sizeof(len));
+        ifs.read(reinterpret_cast<char*>(&cap), sizeof(cap));
+
+        delete[] data;
+        data = new T[cap];
+
+        // Читаем содержимое массива
+        ifs.read(reinterpret_cast<char*>(data), sizeof(T) * len);
+
+        ifs.close();
+    }
+
     T& operator[](int index) {
         if (index < 0 || index >= len) {
             throw invalid_argument("Invalid index");
         }
         return data[index];
     }
-
 };
 
 template <typename T>
