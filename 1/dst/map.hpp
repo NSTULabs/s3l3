@@ -25,6 +25,40 @@ private:
     int len;
     double loadFactor;
 
+    void rehash(int newcap) {
+        MapNode<T>** newMap = new MapNode<T>*[newcap];
+
+        for (int i = 0; i < newcap; i++) {
+            newMap[i] = nullptr;
+        }
+
+        for (int i = 0; i < cap; i++) {
+            MapNode<T>* current = data[i];
+            while (current != nullptr) {
+                MapNode<T>* next = current->next;
+                uint32_t newIndex = hash(current->key) % newcap;
+                
+                if (newMap[newIndex] == nullptr) { // бакета нет
+                    current->next = nullptr;
+                    newMap[newIndex] = current;
+                } else { // бакет есть -> добавляем в него
+                    MapNode<T>* currentNewMap = newMap[newIndex];
+
+                    while (currentNewMap->next != nullptr) {
+                        currentNewMap = currentNewMap->next;
+                    }
+                    current->next = nullptr;
+                    currentNewMap->next = current;
+                }
+                current = next;
+            }
+        }
+
+        delete[] data;
+        data = newMap;
+        cap = newcap;
+    }
+
 public:
     Map() {
         cap = 16;
@@ -127,40 +161,6 @@ public:
         }
 
         throw runtime_error("Key not found");
-    }
-
-    void rehash(int newcap) {
-        MapNode<T>** newMap = new MapNode<T>*[newcap];
-
-        for (int i = 0; i < newcap; i++) {
-            newMap[i] = nullptr;
-        }
-
-        for (int i = 0; i < cap; i++) {
-            MapNode<T>* current = data[i];
-            while (current != nullptr) {
-                MapNode<T>* next = current->next;
-                uint32_t newIndex = hash(current->key) % newcap;
-                
-                if (newMap[newIndex] == nullptr) { // бакета нет
-                    current->next = nullptr;
-                    newMap[newIndex] = current;
-                } else { // бакет есть -> добавляем в него
-                    MapNode<T>* currentNewMap = newMap[newIndex];
-
-                    while (currentNewMap->next != nullptr) {
-                        currentNewMap = currentNewMap->next;
-                    }
-                    current->next = nullptr;
-                    currentNewMap->next = current;
-                }
-                current = next;
-            }
-        }
-
-        delete[] data;
-        data = newMap;
-        cap = newcap;
     }
 
     // works only with int value

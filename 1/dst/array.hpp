@@ -130,7 +130,6 @@ public:
         delete[] data;
         data = new T[cap];
 
-        // Читаем содержимое массива
         ifs.read(reinterpret_cast<char*>(data), sizeof(T) * len);
 
         ifs.close();
