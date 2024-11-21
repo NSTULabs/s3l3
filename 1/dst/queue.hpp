@@ -17,11 +17,11 @@ public:
     }
 
     T dequeue() {
-        if (this->len == 0) {
+        if (this->size() == 0) {
             throw runtime_error("Queue is empty");
         }
 
-        T dequeued = this->head->value;
+        T dequeued = this->getHead()->value;
         this->removeForward();
         return dequeued;
     }

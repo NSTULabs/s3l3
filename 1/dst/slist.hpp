@@ -2,6 +2,7 @@
 #define SLIST_H
 
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -132,21 +133,6 @@ public:
             current = current->next;
         }
         return nullptr;
-    }
-
-    string join(char delimiter) {
-        string result;
-        SNode<string>* current = head;
-
-        while (current != nullptr) {
-            result += current->value;
-            if (current->next != nullptr) {
-                result += delimiter;
-            }
-            current = current->next;
-        }
-
-        return result;
     }
 
     // works only with int

@@ -229,28 +229,4 @@ public:
     }
 };
 
-void printAVLTree(string& result, AVLTreeNode* node, int depth = 0, string prefix = "") {
-    if (node == nullptr) {
-        return;
-    }
-    if (node->right != nullptr) {
-        printAVLTree(result, node->right, depth + 1, prefix + "\t");
-    }
-    result += "\n";
-
-    result += prefix;
-    result += "[" + to_string(node->value) + "]\n";
-
-    if (node->left != nullptr) {
-        printAVLTree(result, node->left, depth + 1, prefix + "\t");
-    }
-}
-
-ostream& operator<<(ostream& os, const AVLTree& tree) {
-    string stringTree = "";
-    printAVLTree(stringTree, tree.getHead());
-    os << stringTree;
-    return os;
-}
-
 #endif
